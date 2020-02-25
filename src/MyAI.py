@@ -27,20 +27,42 @@ class MyAI ( Agent ):
         # ======================================================================
         
         # the board can be as big as 7x7
+
+        self.direction_turn_left = {"EAST": "NORTH", "NORTH": "WEST", "WEST": "SOUTH", "SOUTH": "EAST"}
+        self.direction_turn_right = {"EAST": "SOUTH", "NORTH": "EAST", "WEST": "NORTH", "SOUTH": "WEST"}
+
         self.possible_board = []
         for i in range(7):
             self.possible_board.append([])
             for j in range(7):
                 self.possible_board[-1].append(dict())
+
+        # checks to see if the agent is at the start of the world
         self.start = True
+
+        # if we need to turn 180
         self.turn = False
+
+        # if you want to backtrack to a safe position
         self.backtrack = False
+
+        # list of moves that we iterate through backwards once we find the gold
         self.moves = []
+
+        # bool if we have the gold
         self.gold = False
 
-
+        # grid coordinates
         self.x = 0
         self.y = 0
+
+        # orientation to get to for the agent
+        self.target_orientation = "EAST"
+        # checks to see if the agent needs to get to target orientation
+        self.turning = False
+
+        # string to see which direction our agent is currently facing
+        self.orientation = "EAST"
 
         # ======================================================================
         # YOUR CODE ENDS
@@ -102,7 +124,11 @@ class MyAI ( Agent ):
     # ======================================================================
     # YOUR CODE BEGINS
     # ======================================================================
+    def _turn_left(self) -> None:
+        self.orientation = self.direction_turn_left[self.orientation]
 
+    def _turn_right(self) -> None:
+        self.orientation = self.direction_turn_right[self.orientation]
     
     # ======================================================================
     # YOUR CODE ENDS
