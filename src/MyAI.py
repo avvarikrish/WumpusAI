@@ -37,6 +37,9 @@ class MyAI ( Agent ):
             'stench': False,
             'safe': False
         }
+        # lets the agent know which direction he will be searching in
+        self.searching_east = True
+        self.searching_north = False
         self.possible_board = []
         for i in range(7):
             self.possible_board.append([])
@@ -102,16 +105,20 @@ class MyAI ( Agent ):
         if self.backtrack and not self.turning:
             print(self.possible_board)
             print(self.possible_board[self.y][self.x]['breeze'])
-            if not self.possible_board[self.y][self.x]['breeze']:
+            if not self.possible_board[self.y][self.x]['breeze'] and not self.possible_board[self.y][self.x]['stench']:
                 self._turn_right()
+                self.searching_east = False
+                self.searching_north = True
+                self.backtrack = False
                 return Agent.Action.TURN_RIGHT
             else:
                 self.x -= 1
                 return Agent.Action.FORWARD
 
-        if breeze:
+        if breeze or stench:
             # mark the board as having a breeze
-            self.possible_board[self.y][self.x]['breeze'] = True
+            self.possible_board[self.y][self.x]['breeze'] = breeze
+            self.possible_board[self.y][self.x]['stench'] = stench
             self.possible_board[self.y][self.x]['safe'] = True
 
             if self.x == 0 and self.y == 0:
@@ -136,11 +143,17 @@ class MyAI ( Agent ):
 
         if not stench and not breeze and not glitter and not bump and not scream:
             self.possible_board[self.y][self.x]['safe'] = True
+            if self.searching_north:
+                self.y += 1
+                return Agent.Action.FORWARD
+            if self.searching_east:
+                self.x += 1
+                return Agent.Action.FORWARD
 
         for i in self.possible_board:
             print(i)
-        self.x += 1
-        return Agent.Action.FORWARD
+        # self.x += 1
+        # return Agent.Action.FORWARD
         # ======================================================================
         # YOUR CODE ENDS
         # ======================================================================
