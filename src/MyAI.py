@@ -31,17 +31,20 @@ class MyAI ( Agent ):
         self.direction_turn_left = {"EAST": "NORTH", "NORTH": "WEST", "WEST": "SOUTH", "SOUTH": "EAST"}
         self.direction_turn_right = {"EAST": "SOUTH", "NORTH": "EAST", "WEST": "NORTH", "SOUTH": "WEST"}
 
+        temp_dict = {
+            'breeze': False,
+            'wall': False,
+            'stench': False,
+            'safe': False
+        }
         self.possible_board = []
         for i in range(7):
             self.possible_board.append([])
             for j in range(7):
-                self.possible_board[-1].append(dict())
+                self.possible_board[-1].append(temp_dict)
 
         # checks to see if the agent is at the start of the world
         self.start = True
-
-        # if we need to turn 180
-        self.turn = False
 
         # if you want to backtrack to a safe position
         self.backtrack = False
@@ -80,28 +83,50 @@ class MyAI ( Agent ):
             backward_move = move
             return backward_move
 
-        if self.turn:
-            self.turn = False
-            return Agent.Action.TURN_LEFT
-
-        if self.start:
-            self.start = False
-            return Agent.Action.TURN_LEFT
-
         if bump:
             self.possible_board[self.y][self.x]['wall'] = True
 
         if glitter:
             return Agent.Action.GRAB
 
+        # need to reach target orientation
+        if self.turning:
+            # change orientation to left
+            self._turn_left()
+            # if reached target orientation, stop turning
+            if self.orientation == self.target_orientation:
+                self.turning = False
+            return Agent.Action.TURN_LEFT
+
+        # go back if reached breeze until reach no breeze
+        if self.backtrack and not self.turning:
+            print(self.possible_board)
+            if not self.possible_board[self.y][self.x]['breeze']:
+                self._turn_right()
+                return Agent.Action.TURN_RIGHT
+            else:
+                self.x -= 1
+                return Agent.Action.FORWARD
+
         if breeze:
-            # if self.x == 0 and self.y == 0:
-            #     # return Agent.Action.CLIMB
-            #     pass
-            if True:
-                # mark the adjacent squares as a possible pit
-                self.possible_board[self.y][self.x]['breeze'] = True
-                self.possible_board[self.y][self.x]['safe'] = True
+            # mark the board as having a breeze
+            self.possible_board[self.y][self.x]['breeze'] = True
+            self.possible_board[self.y][self.x]['safe'] = True
+
+            if self.x == 0 and self.y == 0:
+                return Agent.Action.CLIMB
+
+            # if at the bottom of the world
+            if self.y == 0:
+                # if facing east, need to turn around
+                if self.orientation == 'EAST':
+                    self.turning = True
+                    self.target_orientation = 'WEST'
+                    self.orientation = 'NORTH'
+                    self.backtrack = True
+                    return Agent.Action.TURN_LEFT
+
+
 
         if stench:
             self.possible_board[self.y][self.x]['stench'] = True
@@ -115,7 +140,7 @@ class MyAI ( Agent ):
 
         for i in self.possible_board:
             print(i)
-        self.y += 1
+        self.x += 1
         return Agent.Action.FORWARD
         # ======================================================================
         # YOUR CODE ENDS

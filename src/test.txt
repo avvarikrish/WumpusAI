@@ -1,0 +1,23 @@
+.    .     .    .
+.    .    B.    .
+GB. B.   PB.  BS.
+P. B. PBS. WB.
+B.    .   B.  PS.
+@.    .    .   B.
+
+
+Breeze conditions:
+	if at 0, 0:
+		climb
+	if bottom:
+		self.turning = True
+		self.target_orientation = WEST
+		turn to NORTH
+		go NORTH 1
+	if left edge:
+		
+	if right edge:
+
+	if middle:
+
+	
