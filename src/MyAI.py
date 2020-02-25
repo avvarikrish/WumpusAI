@@ -101,6 +101,7 @@ class MyAI ( Agent ):
         # go back if reached breeze until reach no breeze
         if self.backtrack and not self.turning:
             print(self.possible_board)
+            print(self.possible_board[self.y][self.x]['breeze'])
             if not self.possible_board[self.y][self.x]['breeze']:
                 self._turn_right()
                 return Agent.Action.TURN_RIGHT
