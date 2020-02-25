@@ -26,7 +26,22 @@ class MyAI ( Agent ):
         # YOUR CODE BEGINS
         # ======================================================================
         
-        pass
+        # the board can be as big as 7x7
+        self.possible_board = []
+        for i in range(7):
+            self.possible_board.append([])
+            for j in range(7):
+                self.possible_board[-1].append(dict())
+        self.start = True
+        self.turn = False
+        self.backtrack = False
+        self.moves = []
+        self.gold = False
+
+
+        self.x = 0
+        self.y = 0
+
         # ======================================================================
         # YOUR CODE ENDS
         # ======================================================================
@@ -35,19 +50,51 @@ class MyAI ( Agent ):
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
+
+        print(stench, breeze, glitter, bump, scream)
+        if self.gold:
+            move = self.moves[-1]
+            self.moves.pop()
+            backward_move = move
+            return backward_move
+
+        if self.turn:
+            self.turn = False
+            return Agent.Action.TURN_LEFT
+
+        if self.start:
+            self.start = False
+            return Agent.Action.TURN_LEFT
+
+        if bump:
+            self.possible_board[self.y][self.x]['wall'] = True
+
         if glitter:
+            return Agent.Action.GRAB
+
+        if breeze:
+            # if self.x == 0 and self.y == 0:
+            #     # return Agent.Action.CLIMB
+            #     pass
+            if True:
+                # mark the adjacent squares as a possible pit
+                self.possible_board[self.y][self.x]['breeze'] = True
+                self.possible_board[self.y][self.x]['safe'] = True
+
+        if stench:
+            self.possible_board[self.y][self.x]['stench'] = True
+            self.possible_board[self.y][self.x]['safe'] = True
+
+        if scream:
             pass
-        elif breeze:
-            pass
-        elif stench:
-            pass
-        elif bump:
-            pass
-        elif scream:
-            pass
-        else:
-            pass
-        return Agent.Action.CLIMB
+
+        if not stench and not breeze and not glitter and not bump and not scream:
+            self.possible_board[self.y][self.x]['safe'] = True
+
+        for i in self.possible_board:
+            print(i)
+        self.y += 1
+        return Agent.Action.FORWARD
         # ======================================================================
         # YOUR CODE ENDS
         # ======================================================================
