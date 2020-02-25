@@ -41,7 +41,7 @@ class MyAI ( Agent ):
         for i in range(7):
             self.possible_board.append([])
             for j in range(7):
-                self.possible_board[-1].append(temp_dict)
+                self.possible_board[-1].append(dict(temp_dict))
 
         # checks to see if the agent is at the start of the world
         self.start = True
@@ -126,8 +126,6 @@ class MyAI ( Agent ):
                     self.orientation = 'NORTH'
                     self.backtrack = True
                     return Agent.Action.TURN_LEFT
-
-
 
         if stench:
             self.possible_board[self.y][self.x]['stench'] = True
