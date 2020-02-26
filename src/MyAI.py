@@ -54,7 +54,7 @@ class MyAI ( Agent ):
 
         # if you want to backtrack to a safe position
         self.backtrack = False
-
+        self._go_back = False
         # list of moves that we iterate through backwards once we find the gold
         self.moves = []
 
@@ -82,10 +82,12 @@ class MyAI ( Agent ):
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
-
+        print(self.x, self.y)
         self._set_environment(stench, breeze, glitter, bump, scream, self.possible_board[self.y][self.x])
-        # for i in self.possible_board:
-        #     print(i)
+        for i in self.possible_board:
+            for j in i:
+                print(j['visited'], end=' ')
+            print()
         print(self.moves)
         print(stench, breeze, glitter, bump, scream)
         if self.gold:
@@ -110,8 +112,20 @@ class MyAI ( Agent ):
                 self.turning = False
             return Agent.Action.TURN_LEFT
 
+        if self._go_back and not self.turning:
+            self._go_back = False
+            if self.orientation == "EAST":
+                self.x += 1
+            if self.orientation == "WEST":
+                self.x -= 1
+            if self.orientation == "NORTH":
+                self.y += 1
+            if self.orientation == "SOUTH":
+                self.y -= 1
+            return Agent.Action.FORWARD
+
         # go back if reached breeze until reach no breeze/stench
-        if self.backtrack and not self.turning:
+        if self.backtrack and not self._go_back:
             # past_move = self.moves.pop()
 
             # if not self.possible_board[self.y][self.x]['breeze'] and not self.possible_board[self.y][self.x]['stench']:
@@ -131,25 +145,39 @@ class MyAI ( Agent ):
             #         self.y -= 1
             #
             #     return Agent.Action.FORWARD
-
+            print(self.can_visit())
             if not self.can_visit():
-                print(m)
                 print(self.moves)
                 m = self.moves[-1]
+                print(m)
                 self.target_orientation = self.direction_opposite[m]
-
+                print(self.target_orientation)
                 if self.orientation == self.target_orientation:
                     self.moves.pop()
+                    if self.orientation == "EAST":
+                        self.x += 1
+                    if self.orientation == "WEST":
+                        self.x -= 1
+                    if self.orientation == "NORTH":
+                        self.y += 1
+                    if self.orientation == "SOUTH":
+                        self.y -= 1
                     return Agent.Action.FORWARD
                 else:
                     self.turning = True
                     self.orientation = self.direction_turn_left[self.orientation]
                     return Agent.Action.TURN_LEFT
             else:
+                print('yee haw')
                 self.backtrack = False
 
+        if bump:
+            if self.orientation == "EAST" and self.x < 7:
+                self.possible_board[self.y][self.x+1]['visited'] = True
 
-        if breeze or stench or bump:
+            if self.orientation == "NORTH" and self.y < 7:
+                self.possible_board[self.y+1][self.x]['visited'] = True
+        if breeze or stench:
             # mark the board as having a breeze
 
             if self.x == 0 and self.y == 0:
@@ -159,7 +187,10 @@ class MyAI ( Agent ):
             # if self.y == 0:
             # if facing east, need to turn around
 
+
+
             self.turning = True
+            self._go_back = True
             self.backtrack = True
             self.target_orientation = self.direction_opposite[self.orientation]
             self.orientation = self.direction_turn_left[self.orientation]
@@ -233,9 +264,10 @@ class MyAI ( Agent ):
 
             else:
                 # backtrack call
-                pass
-                # self.turning = True
-                # self.backtrack = True
+
+                self.turning = True
+                self.backtrack = True
+
                 # self.target_orientation = self.direction_opposite[self.orientation]
                 # self.orientation = self.direction_turn_left[self.orientation]
                 # return Agent.Action.TURN_LEFT
