@@ -173,10 +173,12 @@ class MyAI ( Agent ):
 
         if bump:
             if self.orientation == "EAST" and self.x < 7:
-                self.possible_board[self.y][self.x+1]['visited'] = True
+                for i in range(7):
+                    self.possible_board[i][self.x+1]['visited'] = True
 
             if self.orientation == "NORTH" and self.y < 7:
-                self.possible_board[self.y+1][self.x]['visited'] = True
+                for i in range(7):
+                    self.possible_board[self.y+1][i]['visited'] = True
         if breeze or stench:
             # mark the board as having a breeze
 
