@@ -83,7 +83,6 @@ class MyAI ( Agent ):
         # YOUR CODE BEGINS
         # ======================================================================
         try:
-            print(self.x, self.y)
             # set the environment
             self._set_environment(stench, breeze, glitter, bump, scream, self.possible_board[self.y][self.x])
             # print the current board
@@ -172,13 +171,9 @@ class MyAI ( Agent ):
                 #         self.y -= 1
                 #
                 #     return Agent.Action.FORWARD
-                print(self.can_visit_around())
                 if not self.can_visit_around():
-                    print(self.moves)
                     m = self.moves[-1]
-                    print(m)
                     self.target_orientation = self.direction_opposite[m]
-                    print(self.target_orientation)
                     if self.orientation == self.target_orientation:
                         self.moves.pop()
                         if self.orientation == "EAST":
@@ -199,13 +194,18 @@ class MyAI ( Agent ):
                     self.backtrack = False
 
             if bump:
+                self.moves.pop()
                 if self.orientation == "EAST" and self.x < 7:
+                    self.x -= 1
                     for i in range(7):
                         self.possible_board[i][self.x+1]['visited'] = True
 
                 if self.orientation == "NORTH" and self.y < 7:
+                    self.y -= 1
                     for i in range(7):
                         self.possible_board[self.y+1][i]['visited'] = True
+                # return Agent.Action.CLIMB
+
             if breeze or stench:
                 # mark the board as having a breeze
 
@@ -247,7 +247,7 @@ class MyAI ( Agent ):
             if not stench and not breeze and not glitter and not bump and not scream:
                 print('sup')
                 # if self.checking:
-                if self.x < 7 and not self.possible_board[self.y][self.x+1]['visited']:
+                if self.x < 6 and not self.possible_board[self.y][self.x+1]['visited']:
                     if self.orientation == 'EAST':
                         self.x += 1
                         self.moves.append('EAST')
@@ -257,8 +257,7 @@ class MyAI ( Agent ):
                         self.turning = True
                         self.orientation = self.direction_turn_left[self.orientation]
                         return Agent.Action.TURN_LEFT
-
-                elif self.y < 7 and not self.possible_board[self.y+1][self.x]['visited']:
+                elif self.y < 6 and not self.possible_board[self.y+1][self.x]['visited']:
                     if self.orientation == 'NORTH':
                         self.y += 1
                         self.moves.append('NORTH')
@@ -268,7 +267,16 @@ class MyAI ( Agent ):
                         self.turning = True
                         self.orientation = self.direction_turn_left[self.orientation]
                         return Agent.Action.TURN_LEFT
-
+                elif self.x > 0 and not self.possible_board[self.y][self.x-1]['visited']:
+                    if self.orientation == 'WEST':
+                        self.x -= 1
+                        self.moves.append('WEST')
+                        return Agent.Action.FORWARD
+                    else:
+                        self.target_orientation = 'WEST'
+                        self.turning = True
+                        self.orientation = self.direction_turn_left[self.orientation]
+                        return Agent.Action.TURN_LEFT
                 elif self.y > 0 and not self.possible_board[self.y-1][self.x]['visited']:
                     if self.orientation == 'SOUTH':
                         self.y -= 1
@@ -280,16 +288,6 @@ class MyAI ( Agent ):
                         self.orientation = self.direction_turn_left[self.orientation]
                         return Agent.Action.TURN_LEFT
 
-                elif self.x > 0 and not self.possible_board[self.y][self.x-1]['visited']:
-                    if self.orientation == 'WEST':
-                        self.x -= 1
-                        self.moves.append('WEST')
-                        return Agent.Action.FORWARD
-                    else:
-                        self.target_orientation = 'WEST'
-                        self.turning = True
-                        self.orientation = self.direction_turn_left[self.orientation]
-                        return Agent.Action.TURN_LEFT
 
                 else:
                     # backtrack call
@@ -315,6 +313,7 @@ class MyAI ( Agent ):
             # self.x += 1
             # return Agent.Action.FORWARD
         finally:
+            print(self.x, self.y)
             print(self.moves)
             print('go back', self._go_back)
             print('backtrack', self.backtrack)
@@ -341,7 +340,7 @@ class MyAI ( Agent ):
         temp_dict['visited'] = True
 
     def can_visit_around(self):
-        return (self.y < 7 and not self.possible_board[self.y+1][self.x]['visited']) or (self.y > 0 and not self.possible_board[self.y-1][self.x]['visited']) or (self.x < 7 and not self.possible_board[self.y][self.x+1]['visited']) or (self.x > 0 and not self.possible_board[self.y][self.x-1]['visited'])
+        return (self.y < 6 and not self.possible_board[self.y+1][self.x]['visited']) or (self.y > 0 and not self.possible_board[self.y-1][self.x]['visited']) or (self.x < 6 and not self.possible_board[self.y][self.x+1]['visited']) or (self.x > 0 and not self.possible_board[self.y][self.x-1]['visited'])
 
     def _at_start(self):
         return self.x == 0 and self.y == 0
