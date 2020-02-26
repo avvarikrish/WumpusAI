@@ -104,15 +104,15 @@ class MyAI ( Agent ):
                 self.turning = False
             return Agent.Action.TURN_LEFT
 
-        # go back if reached breeze until reach no breeze
+        # go back if reached breeze until reach no breeze/stench
         if self.backtrack and not self.turning:
-            print(self.possible_board)
-            print(self.possible_board[self.y][self.x]['breeze'])
             if not self.possible_board[self.y][self.x]['breeze'] and not self.possible_board[self.y][self.x]['stench']:
-                self._turn_right()
                 self.searching_east = False
                 self.searching_north = True
                 self.backtrack = False
+                # make general step
+                self._turn_right()
+                # make
                 return Agent.Action.TURN_RIGHT
             else:
                 self.x -= 1
@@ -134,10 +134,6 @@ class MyAI ( Agent ):
                     self.orientation = 'NORTH'
                     self.backtrack = True
                     return Agent.Action.TURN_LEFT
-
-        if stench:
-            # self.possible_board[self.y][self.x]['stench'] = True
-            self.possible_board[self.y][self.x]['safe'] = True
 
         if scream:
             pass
