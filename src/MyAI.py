@@ -82,211 +82,243 @@ class MyAI ( Agent ):
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
-        print(self.x, self.y)
-        self._set_environment(stench, breeze, glitter, bump, scream, self.possible_board[self.y][self.x])
-        for i in self.possible_board:
-            for j in i:
-                print(j['visited'], end=' ')
-            print()
-        print(self.moves)
-        print(stench, breeze, glitter, bump, scream)
-        if self.gold:
-            move = self.moves[-1]
-            self.moves.pop()
-            backward_move = move
-            return backward_move
-
-        # if bump:
-        #     self.possible_board[self.y][self.x]['wall'] = True
-
-        if glitter:
-            self.gold = True
-            return Agent.Action.GRAB
-
-        # need to reach target orientation
-        if self.turning:
-            # change orientation to left
-            self._turn_left()
-            # if reached target orientation, stop turning
-            if self.orientation == self.target_orientation:
-                self.turning = False
-            return Agent.Action.TURN_LEFT
-
-        if self._go_back and not self.turning:
-            self._go_back = False
-            if self.orientation == "EAST":
-                self.x += 1
-            if self.orientation == "WEST":
-                self.x -= 1
-            if self.orientation == "NORTH":
-                self.y += 1
-            if self.orientation == "SOUTH":
-                self.y -= 1
-            return Agent.Action.FORWARD
-
-        # go back if reached breeze until reach no breeze/stench
-        if self.backtrack and not self._go_back:
-            # past_move = self.moves.pop()
-
-            # if not self.possible_board[self.y][self.x]['breeze'] and not self.possible_board[self.y][self.x]['stench']:
-            #     self.backtrack = False
-            #     self.turning = True
-            #     self.target_orientation = self.direction_opposite[self.orientation]
-            #     self.orientation = self.direction_turn_left[self.orientation]
-            #     return Agent.Action.TURN_LEFT
-            # else:
-            #     if self.orientation == 'WEST':
-            #         self.x -= 1
-            #     elif self.orientation == 'EAST':
-            #         self.x += 1
-            #     elif self.orientation == 'NORTH':
-            #         self.y += 1
-            #     elif self.orientation == 'SOUTH':
-            #         self.y -= 1
-            #
-            #     return Agent.Action.FORWARD
-            print(self.can_visit())
-            if not self.can_visit():
-                print(self.moves)
-                m = self.moves[-1]
-                print(m)
-                self.target_orientation = self.direction_opposite[m]
-                print(self.target_orientation)
-                if self.orientation == self.target_orientation:
-                    self.moves.pop()
-                    if self.orientation == "EAST":
-                        self.x += 1
-                    if self.orientation == "WEST":
-                        self.x -= 1
-                    if self.orientation == "NORTH":
-                        self.y += 1
-                    if self.orientation == "SOUTH":
-                        self.y -= 1
-                    return Agent.Action.FORWARD
-                else:
-                    self.turning = True
-                    self.orientation = self.direction_turn_left[self.orientation]
-                    return Agent.Action.TURN_LEFT
-            else:
-                print('yee haw')
-                self.backtrack = False
-
-        if bump:
-            if self.orientation == "EAST" and self.x < 7:
-                for i in range(7):
-                    self.possible_board[i][self.x+1]['visited'] = True
-
-            if self.orientation == "NORTH" and self.y < 7:
-                for i in range(7):
-                    self.possible_board[self.y+1][i]['visited'] = True
-        if breeze or stench:
-            # mark the board as having a breeze
-
-            if self.x == 0 and self.y == 0:
+        try:
+            print(self.x, self.y)
+            # set the environment
+            self._set_environment(stench, breeze, glitter, bump, scream, self.possible_board[self.y][self.x])
+            # print the current board
+            for i in self.possible_board:
+                for j in i:
+                    print(j['visited'], end=' ')
+                print()
+            # if at the start and can't visit anywhere else or found gold
+            if self._at_start() and (not self.can_visit_around() or self.gold):
                 return Agent.Action.CLIMB
 
-            # if at the bottom of the world
-            # if self.y == 0:
-            # if facing east, need to turn around
+            # if have gold, backtrack the moves
+            if self.gold:
+                # turn the dude to the right orientation
+                # if self.orientation != self.target_orientation:
+                self.target_orientation = self.direction_opposite[self.moves[-1]]
+                if self.target_orientation != self.orientation:
+                    self.turning = True
+                    self.orientation = self.direction_turn_left[self.orientation]
+                    return Agent.Action.TURN_LEFT
+                else:
+                    self.moves.pop()
+                    if self.orientation == 'WEST':
+                        self.x -= 1
+                    if self.orientation == 'EAST':
+                        self.x += 1
+                    if self.orientation == 'SOUTH':
+                        self.y -= 1
+                    if self.orientation == 'NORTH':
+                        self.y += 1
+                    return Agent.Action.FORWARD
+                # else:
+                #     if self.orientation == self.direction_opposite[self.moves[-1]]:
+                #         return Agent.Action.FORWARD
+                #
 
+            # if bump:
+            #     self.possible_board[self.y][self.x]['wall'] = True
 
+            # grab the gold
+            if glitter:
+                self.gold = True
+                return Agent.Action.GRAB
 
-            self.turning = True
-            self._go_back = True
-            self.backtrack = True
-            self.target_orientation = self.direction_opposite[self.orientation]
-            self.orientation = self.direction_turn_left[self.orientation]
-            return Agent.Action.TURN_LEFT
+            # need to reach target orientation
+            if self.turning:
+                # change orientation to left
+                self._turn_left()
+                # if reached target orientation, stop turning
+                if self.orientation == self.target_orientation:
+                    self.turning = False
+                return Agent.Action.TURN_LEFT
 
-
-            # if self.orientation == 'EAST':
-            #     self.turning = True
-            #     self.target_orientation = 'WEST'
-            #     self.orientation = 'NORTH'
-            #     self.backtrack = True
-            #     self.moves.append('left')
-            #     return Agent.Action.TURN_LEFT
-            # if self.orientation == 'NORTH':
-            #     self.turning = True
-            #     self.target_orientation = 'SOUTH'
-            #     self.orientation = 'WEST'
-            #     self.backtrack = True
-            #     self.moves.append('left')
-            #     return Agent.Action.TURN_LEFT
-
-        # if scream:
-        #     pass
-
-        if not stench and not breeze and not glitter and not bump and not scream:
-
-            # if self.checking:
-            if self.x < 7 and not self.possible_board[self.y][self.x+1]['visited']:
-                if self.orientation == 'EAST':
+            # reach a safe location with 1 move
+            if self._go_back and not self.turning:
+                self._go_back = False
+                if self.orientation == "EAST":
                     self.x += 1
-                    self.moves.append('EAST')
-                    return Agent.Action.FORWARD
-                else:
-                    self.target_orientation = 'EAST'
-                    self.turning = True
-                    self.orientation = self.direction_turn_left[self.orientation]
-                    return Agent.Action.TURN_LEFT
-
-            elif self.y < 7 and not self.possible_board[self.y+1][self.x]['visited']:
-                if self.orientation == 'NORTH':
-                    self.y += 1
-                    self.moves.append('NORTH')
-                    return Agent.Action.FORWARD
-                else:
-                    self.target_orientation = 'NORTH'
-                    self.turning = True
-                    self.orientation = self.direction_turn_left[self.orientation]
-                    return Agent.Action.TURN_LEFT
-
-            elif self.y > 0 and not self.possible_board[self.y-1][self.x]['visited']:
-                if self.orientation == 'SOUTH':
-                    self.y -= 1
-                    self.moves.append('SOUTH')
-                    return Agent.Action.FORWARD
-                else:
-                    self.target_orientation = 'SOUTH'
-                    self.turning = True
-                    self.orientation = self.direction_turn_left[self.orientation]
-                    return Agent.Action.TURN_LEFT
-
-            elif self.x > 0 and not self.possible_board[self.y][self.x-1]['visited']:
-                if self.orientation == 'WEST':
+                if self.orientation == "WEST":
                     self.x -= 1
-                    self.moves.append('WEST')
-                    return Agent.Action.FORWARD
-                else:
-                    self.target_orientation = 'WEST'
-                    self.turning = True
-                    self.orientation = self.direction_turn_left[self.orientation]
-                    return Agent.Action.TURN_LEFT
+                if self.orientation == "NORTH":
+                    self.y += 1
+                if self.orientation == "SOUTH":
+                    self.y -= 1
+                self.moves.pop()
+                return Agent.Action.FORWARD
 
-            else:
-                # backtrack call
+            # go back if reached breeze until reach no breeze/stench
+            if self.backtrack and not self._go_back:
+                # past_move = self.moves.pop()
+
+                # if not self.possible_board[self.y][self.x]['breeze'] and not self.possible_board[self.y][self.x]['stench']:
+                #     self.backtrack = False
+                #     self.turning = True
+                #     self.target_orientation = self.direction_opposite[self.orientation]
+                #     self.orientation = self.direction_turn_left[self.orientation]
+                #     return Agent.Action.TURN_LEFT
+                # else:
+                #     if self.orientation == 'WEST':
+                #         self.x -= 1
+                #     elif self.orientation == 'EAST':
+                #         self.x += 1
+                #     elif self.orientation == 'NORTH':
+                #         self.y += 1
+                #     elif self.orientation == 'SOUTH':
+                #         self.y -= 1
+                #
+                #     return Agent.Action.FORWARD
+                print(self.can_visit_around())
+                if not self.can_visit_around():
+                    print(self.moves)
+                    m = self.moves[-1]
+                    print(m)
+                    self.target_orientation = self.direction_opposite[m]
+                    print(self.target_orientation)
+                    if self.orientation == self.target_orientation:
+                        self.moves.pop()
+                        if self.orientation == "EAST":
+                            self.x += 1
+                        if self.orientation == "WEST":
+                            self.x -= 1
+                        if self.orientation == "NORTH":
+                            self.y += 1
+                        if self.orientation == "SOUTH":
+                            self.y -= 1
+                        return Agent.Action.FORWARD
+                    else:
+                        self.turning = True
+                        self.orientation = self.direction_turn_left[self.orientation]
+                        return Agent.Action.TURN_LEFT
+                else:
+                    print('yee haw')
+                    self.backtrack = False
+
+            if bump:
+                if self.orientation == "EAST" and self.x < 7:
+                    for i in range(7):
+                        self.possible_board[i][self.x+1]['visited'] = True
+
+                if self.orientation == "NORTH" and self.y < 7:
+                    for i in range(7):
+                        self.possible_board[self.y+1][i]['visited'] = True
+            if breeze or stench:
+                # mark the board as having a breeze
+
+                if self.x == 0 and self.y == 0:
+                    return Agent.Action.CLIMB
+
+                # if at the bottom of the world
+                # if self.y == 0:
+                # if facing east, need to turn around
+
+
 
                 self.turning = True
+                self._go_back = True
                 self.backtrack = True
-
-                # self.target_orientation = self.direction_opposite[self.orientation]
-                # self.orientation = self.direction_turn_left[self.orientation]
-                # return Agent.Action.TURN_LEFT
-
-
-            # if self.searching_north:
-            #     self.y += 1
-            #     self.moves.append('forward')
-            #     return Agent.Action.FORWARD
-            # if self.searching_east:
-            #     self.x += 1
-            #     self.moves.append('forward')
-            #     return Agent.Action.FORWARD
+                self.target_orientation = self.direction_opposite[self.orientation]
+                self.orientation = self.direction_turn_left[self.orientation]
+                return Agent.Action.TURN_LEFT
 
 
-        # self.x += 1
-        # return Agent.Action.FORWARD
+                # if self.orientation == 'EAST':
+                #     self.turning = True
+                #     self.target_orientation = 'WEST'
+                #     self.orientation = 'NORTH'
+                #     self.backtrack = True
+                #     self.moves.append('left')
+                #     return Agent.Action.TURN_LEFT
+                # if self.orientation == 'NORTH':
+                #     self.turning = True
+                #     self.target_orientation = 'SOUTH'
+                #     self.orientation = 'WEST'
+                #     self.backtrack = True
+                #     self.moves.append('left')
+                #     return Agent.Action.TURN_LEFT
+
+            # if scream:
+            #     pass
+
+            if not stench and not breeze and not glitter and not bump and not scream:
+                print('sup')
+                # if self.checking:
+                if self.x < 7 and not self.possible_board[self.y][self.x+1]['visited']:
+                    if self.orientation == 'EAST':
+                        self.x += 1
+                        self.moves.append('EAST')
+                        return Agent.Action.FORWARD
+                    else:
+                        self.target_orientation = 'EAST'
+                        self.turning = True
+                        self.orientation = self.direction_turn_left[self.orientation]
+                        return Agent.Action.TURN_LEFT
+
+                elif self.y < 7 and not self.possible_board[self.y+1][self.x]['visited']:
+                    if self.orientation == 'NORTH':
+                        self.y += 1
+                        self.moves.append('NORTH')
+                        return Agent.Action.FORWARD
+                    else:
+                        self.target_orientation = 'NORTH'
+                        self.turning = True
+                        self.orientation = self.direction_turn_left[self.orientation]
+                        return Agent.Action.TURN_LEFT
+
+                elif self.y > 0 and not self.possible_board[self.y-1][self.x]['visited']:
+                    if self.orientation == 'SOUTH':
+                        self.y -= 1
+                        self.moves.append('SOUTH')
+                        return Agent.Action.FORWARD
+                    else:
+                        self.target_orientation = 'SOUTH'
+                        self.turning = True
+                        self.orientation = self.direction_turn_left[self.orientation]
+                        return Agent.Action.TURN_LEFT
+
+                elif self.x > 0 and not self.possible_board[self.y][self.x-1]['visited']:
+                    if self.orientation == 'WEST':
+                        self.x -= 1
+                        self.moves.append('WEST')
+                        return Agent.Action.FORWARD
+                    else:
+                        self.target_orientation = 'WEST'
+                        self.turning = True
+                        self.orientation = self.direction_turn_left[self.orientation]
+                        return Agent.Action.TURN_LEFT
+
+                else:
+                    # backtrack call
+
+                    self.turning = True
+                    self.backtrack = True
+
+                    # self.target_orientation = self.direction_opposite[self.orientation]
+                    # self.orientation = self.direction_turn_left[self.orientation]
+                    # return Agent.Action.TURN_LEFT
+
+
+                # if self.searching_north:
+                #     self.y += 1
+                #     self.moves.append('forward')
+                #     return Agent.Action.FORWARD
+                # if self.searching_east:
+                #     self.x += 1
+                #     self.moves.append('forward')
+                #     return Agent.Action.FORWARD
+
+
+            # self.x += 1
+            # return Agent.Action.FORWARD
+        finally:
+            print(self.moves)
+            print('go back', self._go_back)
+            print('backtrack', self.backtrack)
+            print('turning', self.turning)
         # ======================================================================
         # YOUR CODE ENDS
         # ======================================================================
@@ -308,9 +340,11 @@ class MyAI ( Agent ):
         temp_dict['scream'] = scream
         temp_dict['visited'] = True
 
-    def can_visit(self):
+    def can_visit_around(self):
         return (self.y < 7 and not self.possible_board[self.y+1][self.x]['visited']) or (self.y > 0 and not self.possible_board[self.y-1][self.x]['visited']) or (self.x < 7 and not self.possible_board[self.y][self.x+1]['visited']) or (self.x > 0 and not self.possible_board[self.y][self.x-1]['visited'])
 
+    def _at_start(self):
+        return self.x == 0 and self.y == 0
 
     
     # ======================================================================
