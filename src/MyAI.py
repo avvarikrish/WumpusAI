@@ -33,9 +33,11 @@ class MyAI ( Agent ):
 
         temp_dict = {
             'breeze': False,
-            'wall': False,
+            'bump': False,
             'stench': False,
-            'safe': False
+            'safe': False,
+            'scream': False,
+            'glitter': False
         }
         # lets the agent know which direction he will be searching in
         self.searching_east = True
@@ -79,6 +81,7 @@ class MyAI ( Agent ):
         # YOUR CODE BEGINS
         # ======================================================================
 
+        self._set_environment(stench, breeze, glitter, bump, scream, self.possible_board[self.y][self.x])
         print(stench, breeze, glitter, bump, scream)
         if self.gold:
             move = self.moves[-1]
@@ -115,10 +118,8 @@ class MyAI ( Agent ):
                 self.x -= 1
                 return Agent.Action.FORWARD
 
-        if breeze or stench:
+        if breeze or stench or bump:
             # mark the board as having a breeze
-            self.possible_board[self.y][self.x]['breeze'] = breeze
-            self.possible_board[self.y][self.x]['stench'] = stench
             self.possible_board[self.y][self.x]['safe'] = True
 
             if self.x == 0 and self.y == 0:
@@ -135,7 +136,7 @@ class MyAI ( Agent ):
                     return Agent.Action.TURN_LEFT
 
         if stench:
-            self.possible_board[self.y][self.x]['stench'] = True
+            # self.possible_board[self.y][self.x]['stench'] = True
             self.possible_board[self.y][self.x]['safe'] = True
 
         if scream:
@@ -166,6 +167,14 @@ class MyAI ( Agent ):
 
     def _turn_right(self) -> None:
         self.orientation = self.direction_turn_right[self.orientation]
+
+    def _set_environment(self, stench, breeze, glitter, bump, scream, temp_dict ):
+        temp_dict['stench'] = stench
+        temp_dict['breeze'] = breeze
+        temp_dict['glitter'] = glitter
+        temp_dict['bump'] = bump
+        temp_dict['scream'] = scream
+
     
     # ======================================================================
     # YOUR CODE ENDS
