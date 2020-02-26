@@ -114,13 +114,6 @@ class MyAI ( Agent ):
                     if self.orientation == 'NORTH':
                         self.y += 1
                     return Agent.Action.FORWARD
-                # else:
-                #     if self.orientation == self.direction_opposite[self.moves[-1]]:
-                #         return Agent.Action.FORWARD
-                #
-
-            # if bump:
-            #     self.possible_board[self.y][self.x]['wall'] = True
 
             # grab the gold
             if glitter:
@@ -152,25 +145,7 @@ class MyAI ( Agent ):
 
             # go back if reached breeze until reach no breeze/stench
             if self.backtrack and not self._go_back:
-                # past_move = self.moves.pop()
 
-                # if not self.possible_board[self.y][self.x]['breeze'] and not self.possible_board[self.y][self.x]['stench']:
-                #     self.backtrack = False
-                #     self.turning = True
-                #     self.target_orientation = self.direction_opposite[self.orientation]
-                #     self.orientation = self.direction_turn_left[self.orientation]
-                #     return Agent.Action.TURN_LEFT
-                # else:
-                #     if self.orientation == 'WEST':
-                #         self.x -= 1
-                #     elif self.orientation == 'EAST':
-                #         self.x += 1
-                #     elif self.orientation == 'NORTH':
-                #         self.y += 1
-                #     elif self.orientation == 'SOUTH':
-                #         self.y -= 1
-                #
-                #     return Agent.Action.FORWARD
                 if not self.can_visit_around():
                     m = self.moves[-1]
                     self.target_orientation = self.direction_opposite[m]
@@ -212,37 +187,12 @@ class MyAI ( Agent ):
                 if self.x == 0 and self.y == 0:
                     return Agent.Action.CLIMB
 
-                # if at the bottom of the world
-                # if self.y == 0:
-                # if facing east, need to turn around
-
-
-
                 self.turning = True
                 self._go_back = True
                 self.backtrack = True
                 self.target_orientation = self.direction_opposite[self.orientation]
                 self.orientation = self.direction_turn_left[self.orientation]
                 return Agent.Action.TURN_LEFT
-
-
-                # if self.orientation == 'EAST':
-                #     self.turning = True
-                #     self.target_orientation = 'WEST'
-                #     self.orientation = 'NORTH'
-                #     self.backtrack = True
-                #     self.moves.append('left')
-                #     return Agent.Action.TURN_LEFT
-                # if self.orientation == 'NORTH':
-                #     self.turning = True
-                #     self.target_orientation = 'SOUTH'
-                #     self.orientation = 'WEST'
-                #     self.backtrack = True
-                #     self.moves.append('left')
-                #     return Agent.Action.TURN_LEFT
-
-            # if scream:
-            #     pass
 
             if not stench and not breeze and not glitter and not bump and not scream:
                 print('sup')
@@ -291,27 +241,9 @@ class MyAI ( Agent ):
 
                 else:
                     # backtrack call
-
                     self.turning = True
                     self.backtrack = True
 
-                    # self.target_orientation = self.direction_opposite[self.orientation]
-                    # self.orientation = self.direction_turn_left[self.orientation]
-                    # return Agent.Action.TURN_LEFT
-
-
-                # if self.searching_north:
-                #     self.y += 1
-                #     self.moves.append('forward')
-                #     return Agent.Action.FORWARD
-                # if self.searching_east:
-                #     self.x += 1
-                #     self.moves.append('forward')
-                #     return Agent.Action.FORWARD
-
-
-            # self.x += 1
-            # return Agent.Action.FORWARD
         finally:
             print(self.x, self.y)
             print(self.moves)
